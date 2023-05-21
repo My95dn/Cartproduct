@@ -1,8 +1,8 @@
 const jwt = require("jsonwebtoken");
-
+require('dotenv').config()
 let bcrypt = require("bcryptjs");
 const db = require("../models");
-const { where } = require("sequelize/types");
+import { where } from "sequelize";
 let salt = bcrypt.genSaltSync(10);
 let saltRounds = 10;
 
@@ -19,7 +19,17 @@ let getAllUser = (id) => {
           Resolve("failure");
         }
       } else {
-        let alldataUser = await db.User.findAll();
+        let alldataUser = await db.User.findAll({
+          attributes: {
+            exclude: [
+              "password",
+              "admin",
+              "refreshtoken",
+              "facebookid",
+              "gooleid",
+            ],
+          },
+        });
         if (alldataUser) {
           Resolve(alldataUser);
         } else {
@@ -50,22 +60,34 @@ let handleloginUser = (email, password) => {
             userdata.password
           );
           if (checkPassword) {
-            let token = jwt.sign(userdata.id, process.env.PRIVATEKEY_JWT, {
-              expiresIn: "72h",
-            });
-            let RefreshToken = jwt.sign(
-              userdata.id,
-              process.env.PRIVATEKEY_JWT,
-              { expiresIn: "720h" }
-            );
-            userdata.RefreshToken = RefreshToken;
-            await db.User.update(
+            let accessToken = jwt.sign(
               {
-                ...userdata,
+                id: userdata.id,
+                iat: new Date().getTime(),
+                exp: new Date().setDate(new Date().getDate() + 3),
               },
-              { where: userdata.id }
+              process.env.PRIVATEKEY_JWT
             );
-            Resolve(token, RefreshToken);
+            let RefreshToken = jwt.sign(
+              {
+                id: userdata.id,
+                iat: new Date().getTime(),
+
+                exp: new Date().setDate(new Date().getDate() + 30),
+              },
+              process.env.REFRESH_JWT
+            ); 
+             await db.User.update(
+              { refreshtoken: RefreshToken }, 
+              {
+                where: { id: userdata.id },
+              }
+            );
+           
+            Resolve({
+              accessToken,
+              RefreshToken,
+            });
           } else {
             Resolve(false);
           }
@@ -198,6 +220,27 @@ const handleEdituser = (data) => {
     }
   });
 };
+const handleTokenAPI = (data) => {
+  return new Promise(async(Reject, Resolve) => {
+    try {
+      if(data) {
+      let idUser = await db.User.findOne({
+          where: {id: data.id}
+        })
+        if(idUser) {
+          Reject(true)
+        } else {
+          Reject(false)
+        }
+      } else {
+        Reject(false)
+      }
+
+    } catch (error) {
+      Resolve(error)
+    }
+  })
+}
 module.exports = {
   getAllUser,
   handleloginUser,
@@ -205,4 +248,5 @@ module.exports = {
   handleDeleteUser,
   handlegetUser,
   handleEdituser,
+  handleTokenAPI
 };

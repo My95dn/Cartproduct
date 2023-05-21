@@ -1,6 +1,7 @@
 import db from "../models/index";
 import servicesAPI from "../services/servicesAPI";
-
+require("dotenv").config();
+const jwt = require("jsonwebtoken");
 let getAllAPIuser = async (req, res) => {
   let UserID = req.query.id;
   let dataUserAll = await servicesAPI.getAllUser(UserID);
@@ -19,27 +20,51 @@ let getAllAPIuser = async (req, res) => {
 let checkUserlogin = async (req, res) => {
   let dataUser = req.body.email;
   let passwordUser = req.body.password;
+  let tokens = req.headers.authorization;
   if (!dataUser) {
-    return res.status(200).json({
-      message: "Please enter full information",
-    });
-  }
+    let data = jwt.verify(tokens.substring(7), process.env.PRIVATEKEY_JWT);
+    if (data) {
+      let tokendata = await servicesAPI.handleTokenAPI(data)
+      if(tokendata) {
 
-  let userData = await servicesAPI.handleloginUser(dataUser, passwordUser);
-  
-  if (userData) {
-    res.setHeader(userData)
-    return res.status(200).json({
-      user: true,
-      message: "success",
-
-    });
+        return res.status(200).json({
+          user: true,
+          message: "success",
+        });
+      } else {
+        return res.status(200).json({
+          user: false,
+          message: "failure",
+        });
+      }
+    } else {
+      return res.status(401).json({
+        user: false,
+        message: "failure",
+      });
+    }
   } else {
-    return res.status(200).json({
-      user: false,
-      message: "failure",
-    });
+
+    let userData = await servicesAPI.handleloginUser(dataUser, passwordUser);
+  
+    if (userData) {
+      return res.status(200).json({
+        user: true,
+        message: "success",
+        token: userData,
+      });
+    } else {
+      return res.status(200).json({
+        user: false,
+        message: "failure",
+      });
+    }
   }
+
+    
+  
+    
+  
 };
 
 const createUser = async (req, res) => {
@@ -112,9 +137,13 @@ const editUser = async (req, res) => {
   }
 };
 const handleSecret = (req, res) => {
+  console.log('checkReffresg', req.user.profile)
   return res.status(200).json({
     message: "success",
   });
+};
+const handleLoginWithGoogle = (req, res) => {
+  console.log("google", req);
 };
 module.exports = {
   getAllAPIuser,
@@ -124,4 +153,5 @@ module.exports = {
   getUser,
   editUser,
   handleSecret,
+  handleLoginWithGoogle,
 };

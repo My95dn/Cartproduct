@@ -18,7 +18,8 @@ module.exports = (sequelize, DataTypes) => {
     gender: DataTypes.STRING,
     gooleid: DataTypes.STRING,
     facebookid: DataTypes.STRING,
-    refreshtoken: DataTypes.STRING
+    refreshtoken: DataTypes.STRING,
+    admin: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'User',

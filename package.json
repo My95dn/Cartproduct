@@ -23,12 +23,13 @@
     "passport": "^0.6.0",
     "passport-google-plus-token": "^2.1.0",
     "passport-jwt": "^4.0.1",
-    "sequelize": "^6.6.2"
+    "sequelize": "^6.31.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.21.0",
     "@babel/core": "^7.21.4",
     "@babel/preset-env": "^7.21.4",
+    "@types/sequelize": "^4.28.15",
     "sequelize-cli": "^6.2.0"
   }
 }

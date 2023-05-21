@@ -1,5 +1,7 @@
 const express = require('express')
 const cors = require('cors')
+const passport = require('passport')
+require('dotenv').config()
 import viewConfig from '../src/config/viewConfig'
 import routerSever from '../src/router/router'
 import handleErro from './config/connectDB'
@@ -14,7 +16,6 @@ app.use(cors({
 viewConfig(app)
 routerSever(app)
 initRouterAPI(app)
-require('dotenv').config()
 const port = process.env.PORT
 
 

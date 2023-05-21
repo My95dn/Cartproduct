@@ -27,13 +27,20 @@ module.exports = {
         type: Sequelize.STRING
       },
       gooleid: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        default: null
       },
       facebookid: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        default: null
       },
       refreshtoken: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        default: null
+      },
+      admin: {
+        type: Sequelize.STRING,
+        default: null
       },
       createdAt: {
         allowNull: false,
